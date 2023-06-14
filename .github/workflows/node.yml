@@ -9,18 +9,24 @@ jobs:
     # the env command sets environment variables that all steps can access
     env:
       CI: true
+      MONGODB_URI: mongodb://localhost:27017/nasa
     strategy:
       matrix:
         node-version: [14.x, 16.x]
+        # run on mongodb v4.2
+        mongodb-version: ["4.2"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Use node.js v16
         uses: actions/setup-node@v2
-        # use the node version defined in the matrix
-        # The ${} syntax is called variable expansion
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Use MongoDB from Github actions
+        # set up MongoDB on localhost:27017
+        uses: supercharge/mongodb-github-action@1.8.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
       - run: npm install
       - run: npm run build --prefix client
-      - run: npm test --prefix client
+      - run: npm test
