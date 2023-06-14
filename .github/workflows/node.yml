@@ -1,20 +1,26 @@
-# defines the name of the github action
 name: NASA Project Continuous Integration
 on:
-  push: # push requests, master branch will be affected
+  push:
     branches: [master]
-  pull_request: # pull requests, master branch will be affected
+  pull_request:
     branches: [master]
 jobs:
   build:
-    # run on ubuntu is preferred
+    # the env command sets environment variables that all steps can access
+    env:
+      CI: true
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
     runs-on: ubuntu-latest
-    # steps to run, each step is defined with a bullet point
     steps:
       - uses: actions/checkout@v2
       - name: Use node.js v16
         uses: actions/setup-node@v2
+        # use the node version defined in the matrix
+        # The ${} syntax is called variable expansion
         with:
-          node-version: "16.x"
+          node-version: ${{ matrix.node-version }}
       - run: npm install
       - run: npm run build --prefix client
+      - run: npm test --prefix client
